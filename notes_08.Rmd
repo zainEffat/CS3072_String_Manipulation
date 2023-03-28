@@ -1,0 +1,370 @@
+---
+title: "String manipulation"
+author: ""
+date: ""
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+## Main ideas
+
+- Working with string data is essential for a number of data science tasks,
+  including data cleaning, data preparation, and text analysis.
+  
+- The `stringr` package in `R` (part of the `tidyverse`) contains useful 
+  tools for working with character strings.
+  
+
+## Packages
+
+```{r message = FALSE}
+library(tidyverse)
+```
+
+## Lecture notes and exercises
+
+`stringr` provides tools to work with character strings. Functions in `stringr`
+have consistent, memorable names. 
+
+- All begin with `str_` (`str_count()`, `str_detect()`, `str_trim()`, etc). 
+- All take a vector of strings as their first arguments.
+- We only have time to explore the basics. I encourage you to explore on your 
+  own using the **additional resources** below.
+
+### Preliminaries
+
+Character strings in `R` are defined by double quotation marks. These can 
+include numbers, letters, punctation, whitespace, etc.
+
+```{r first-string}
+string1 <- "CS3072 is my favorite class"
+string1
+```
+
+You can combine character strings in a vector.
+
+```{r combine-strings}
+string2 <- c("CS3072", "Data Science", "Effat University")
+string2
+```
+
+**Question:** What if we want to include a quotation in a string? Why doesn't
+the code below work?
+
+```{r quote-in-string, eval = FALSE}
+string3 <- "I said "Hello" to my class"
+```
+
+To include a double quote in a string **escape it** using a backslash. Try it 
+now in the code chunk below and name your string `string4`.
+
+```{r quote-in-string-fixed}
+string4 <- "I said \"Hello\" to my class"
+```
+
+If you want to include an actual backslash, **escape it** as shown below. This
+may seem tedious but it will be important later.
+
+```{r backslash-in-string}
+string5 <- "\\"
+```
+
+The function `writeLines()` shows the content of the strings not including
+escapes. Try it for `string1`, `string2`, `string3`, `string4`, and `string5` 
+in the code chunk below.
+
+```{r demo-writelines}
+writeLines(string5)
+```
+
+### U.S. States
+
+To demonstrate the basic functions from `stringr` we will use a vector of all 50
+U.S. states.
+
+```{r states-vector}
+states <- c("alabama", "alaska", "arizona", "arkansas", "california", 
+            "colorado", "connecticut", "delaware", "florida", "georgia", 
+            "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", 
+            "kentucky", "louisiana", "maine", "maryland", "massachusetts", 
+            "michigan", "minnesota", "mississippi", "missouri", "montana", 
+            "nebraska", "nevada", "new hampshire", "new jersey", 
+            "new mexico", "new york", "north carolina", "north dakota", "ohio", 
+            "oklahoma", "oregon", "pennsylvania", "rhode island",
+            "south carolina", "south dakota", "tennessee", "texas", "utah", 
+            "vermont", "virginia", "washington", "west virginia", "wisconsin",
+            "wyoming")
+```
+
+#### `str_length()`
+
+Given a string, return the number of characters.
+
+```{r str-length}
+string1
+str_length(string1)
+```
+
+Given a vector of strings, return the number of characters in each string.
+
+```{r str-length-vector}
+str_length(states)
+```
+
+#### `str_c()`
+
+Combine two (or more) strings.
+
+```{r strc}
+str_c("CS 3072", "is", "my", "favorite", "class")
+```
+
+Use `sep` to specify how the strings are separated.
+
+```{r strc-sep}
+str_c("CS 3072", "is", "my", "favorite", "class", sep = " ")
+```
+
+### `str_to_lower()` and `str_to_upper()`
+
+Convert the case of a string from lower to upper or vice versa.
+
+```{r str-cases}
+str_to_upper(states)
+```
+
+### `str_sub()`
+
+Extract parts of a string from `start` to `end`, inclusive.
+
+```{r str-sub-1}
+str_sub(states, 1, 4)
+```
+
+```{r str-sub-2}
+str_sub(states, -4, -1)
+```
+
+**Practice:** Combine `str_sub()` and `str_to_upper()` to capitalize first letter of each 
+state (you can ignore two word states).
+
+```{r cap-states}
+str_sub(states, 1, 1) <- str_to_upper(str_sub(states, 1, 1))
+states
+```
+
+#### `str_sort()`
+
+Sort a string. Below we sort in decreasing alphabetical order.
+
+```{r str-sort}
+str_sort(states, decreasing = TRUE)
+```
+
+### Regular Expressions
+
+A **regular expression** is a sequence of characters that allows you to describe
+string patterns. We use them to search for patterns.
+
+Examples of usage include the following data science tasks:
+
+- extract a phone number from text data
+- determine if an email address is valid
+- determine if a password has some specified number of letters, characters, 
+  numbers, etc
+- count the number of times "statistics" occurs in a corpus of text
+
+To demonstrate regular expressions, we will use a vector of the states 
+bordering North Carolina.
+
+```{r nc-states}
+nc_states <- c("North Carolina", "South Carolina", "Virginia", "Tennessee", 
+               "Georgia")
+```
+
+#### Basic Match
+
+We can match exactly using a **basic match**.
+
+```{r basic-match, eval = FALSE}
+str_view_all(nc_states, pattern = "in")
+```
+
+We can match any character using .
+
+```{r any-char, eval = FALSE}
+str_view_all(nc_states, pattern = ".a")
+```
+
+**Question:** What if we want to match a period .?
+
+*Escape it* using `\.` This is the regular expression.
+
+But we represent regular expressions using strings and \ is also an escape 
+symbol in strings.
+
+*Escape again!*
+
+To create the regular expression `\.`, use the string "`\\.`"
+
+```{r reg-ex-escape, eval = FALSE}
+str_view(c("a.c", "abc", "def"), "a\\.c")
+```
+
+#### Anchors
+
+Match the start of a string using ^.
+
+```{r power-anchor, eval = FALSE}
+str_view(nc_states, "^G")
+```
+
+Match the end of a string using $.
+
+```{r money-anchor, eval = FALSE}
+str_view(nc_states, "a$")
+```
+
+#### `str_detect()`
+
+Determine if a character vector matches a pattern.
+
+```{r str-detect}
+nc_states
+str_detect(nc_states, "a")
+```
+
+#### `str_subset()`
+
+```{r str-subset}
+nc_states
+str_subset(nc_states, "e$")
+```
+
+#### `str_count()`
+
+Determine how many matches there are in a string.
+
+```{r str-count}
+nc_states
+str_count(nc_states, "a")
+```
+
+#### `str_replace()` and `str_replace_all()`
+
+Replace matches with new strings.
+
+```{r str-replace}
+str_replace(nc_states, "a", "-")
+```
+
+Use `str_replace_all()` to replace all matches with new strings.
+
+```{r str-replace-all}
+str_replace_all(nc_states, "a", "-")
+```
+
+#### Many Matches
+
+The regular expressions below match more than one character.
+
+- Match any digit using `\d` or [[:digit:]]
+- Match any whitespace using `\s` or [[:space:]]
+- Match f, g, or h using [fgh]
+- Match anything but f, g, or h using [^fgh]
+- Match lower-case letters using [a-z] or [[:lower:]]
+- Match upper-case letters using [A-Z] or [[:upper:]]
+- Match alphabetic characters using [A-z] or [[:alpha:]]
+
+Remember these are regular expressions! To match digits you'll need to escape 
+the \, so use "\\d", not "\d"
+
+## Practice
+
+To practice manipulating strings we will use question and answer data from
+two recent seasons (2008 - 2009) of the television game show *Jeopardy!*.
+
+```{r read-in-jeopardy}
+jeopardy <- read_csv("data/questions.csv")
+```
+
+- `category`: category of question
+- `value`: value of question in dollars
+- `question`: text of question
+- `answer`: text of question answer
+- `year`: year episode aired
+
+```{r glimpse-data}
+glimpse(jeopardy)
+```
+
+(1) Use a single code pipeline and a function from `stringr` to return all rows
+where the answer **contains** the word "Durham"
+
+```{r practice-1}
+
+```
+
+(2) Use a single code pipeline and `stringr` to find the length of all of the 
+answers, sort by decreasing length, and return the five longest answers.
+
+```{r practice-2}
+
+```
+
+(3) What answer has the most digits?
+
+```{r practice-3}
+
+```
+
+(4) Return all rows where the category has a period.
+
+```{r practice-4}
+
+```
+
+(5) Using a single code pipeline, return all rows where the question contains a 
+(numeric) year between 1800 and 1999
+
+```{r practice-5}
+
+```
+
+(6) Using a single code pipeline, return all rows with answers that begin with 
+three vowels.
+
+```{r practice-6}
+
+```
+
+(7) Using a single code pipeline, return all answers that end with `ugh` but not
+`ough`.
+
+```{r practice-7}
+
+```
+
+(8) Use a single code pipeline to create a new variable `prop_vowel` that
+is the proportion of all letters in each answer that are vowels. What is the
+highest? Lowest?
+
+```{r practice-8}
+jeopardy %>%
+  mutate(vowels = str_count(answer, "[AEIOUaeiou]"),
+         letters = str_count(answer, "[[:alpha:]]"),
+         prop_vowel = vowels / letters) %>%
+  select(answer, vowels, letters, prop_vowel) %>%
+  arrange(desc(prop_vowel)) %>%
+  filter(letters > 5, 
+         !is.na(prop_vowel)) %>%
+  slice(1:3, (n() - 2):n())
+```
+
+## Additional Resources
+
+- [`stringr` website](https://stringr.tidyverse.org/)
+- [`stringr` cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/master/strings.pdf)
+- [Regular Expressions cheat sheet](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf)
+- [R for Data Science: Strings](https://r4ds.had.co.nz/strings.html#matching-patterns-with-regular-expressions)
