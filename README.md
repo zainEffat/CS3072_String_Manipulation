@@ -1,6 +1,4 @@
-# STA 199: String manipulation
-
-**Date**: Friday, February 12<br>
+# CS3072: String manipulation
 
 ## Learning objectives
 
